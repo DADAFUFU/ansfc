@@ -13,6 +13,6 @@ public class CheckController {
     @RequestMapping("/check")
     @ResponseBody
     public String check(){
-        return "OK";
+        return "Ogit puK";
     }
 }
