@@ -1,0 +1,14 @@
+package com.ansfc;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+
+@ComponentScan(basePackages="com.ansfc")
+@SpringBootApplication
+public class AnsfcApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(AnsfcApplication.class, args);
+	}
+}
