@@ -5,13 +5,30 @@ package com.ansfc.thread;
  * 实验证明yield方法不会释放对象锁
  * 实验证明wait方法会释放对象锁
  */
-public class YieldLockTest {
+public class ThreadTest {
 
     private static Object obj = new Object();
 
     public static void main(String[] args){
 //        testYield();
-        testWait();
+//        testWait();
+        testJoin();
+    }
+
+
+    /**
+     * 自线程结束后才能执行主线程
+     */
+    public static void testJoin(){
+        System.out.println("--主线程执行开始--");
+        ThreadC tHreadC = new ThreadC("t1");
+        tHreadC.start();
+        try {
+            tHreadC.join();
+        } catch (InterruptedException e) {
+            tHreadC.interrupt();
+        }
+        System.out.println("--主线程执行结束--");
     }
 
     public static void testYield(){
@@ -74,6 +91,18 @@ public class YieldLockTest {
                 }
 
             }
+        }
+    }
+
+    static class ThreadC extends Thread{
+
+        public ThreadC(String name){
+            super(name);
+        }
+
+        @Override
+        public void run() {
+            System.out.println("自线程执行完毕");
         }
     }
 
