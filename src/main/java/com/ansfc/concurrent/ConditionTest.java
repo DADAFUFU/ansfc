@@ -2,6 +2,7 @@ package com.ansfc.concurrent;
 
 import org.junit.Test;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -92,6 +93,51 @@ public class ConditionTest {
     }
 
 
+    @Test
+    public void testConditionQueue() throws InterruptedException {
+
+        Queue<String> queue = new Queue<>(5);
+        CountDownLatch countDownLatch = new CountDownLatch(15);
+        Thread produce  = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true){
+                    try {
+                        queue.add(String.valueOf(Math.random()));
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        produce.start();
+
+        for(int i=0;i<5;i++){
+            Thread consumer = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while (true){
+                            queue.remove();
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    countDownLatch.countDown();
+                }
+            });
+            consumer.start();
+        }
+
+        countDownLatch.await();
+        System.out.println("测试完毕");
+    }
+
+
+    /**
+     * 张三包饺子
+     */
     static class Zhangsan extends Thread{
 
         String name;
@@ -125,6 +171,9 @@ public class ConditionTest {
         }
     }
 
+    /**
+     * 李四包饺子
+     */
     static class Lisi extends Thread{
 
         String name;
@@ -157,6 +206,66 @@ public class ConditionTest {
             }
             lock.unlock();
         }
+    }
+
+
+    /**
+     * 分布式并发队列实现
+     * @param <T>
+     */
+    public class Queue<T>{
+        private ReentrantLock lock = new ReentrantLock();
+        private Condition unEmpty = lock.newCondition();//不为空
+        private Condition unFull = lock.newCondition();//没有满
+        private Object[] elements;
+
+        private int length = 0,addIndex = 0,removeIndex = 0;
+        public Queue(int size){
+            elements = new Object[size];
+        }
+
+        public void add(T element) throws InterruptedException {
+            lock.lock();
+            try{
+                //队列已满
+                if(length == elements.length){
+                    unFull.await();
+                }
+                elements[addIndex] = element;
+                System.out.println("[produce]"+Thread.currentThread().getName()+":"+element.toString());
+                if(++addIndex == elements.length){
+                    addIndex = 0;
+                }
+                length++;
+                unEmpty.signal();
+            }finally {
+                lock.unlock();
+            }
+        }
+
+        public T remove() throws InterruptedException {
+            lock.lock();
+            try {
+
+                if(length == 0){
+                    System.out.println("[consumer]"+Thread.currentThread().getName()+" waiting");
+                    unEmpty.await();
+                }
+                Object element = elements[removeIndex];
+                System.out.println("[consumer]"+Thread.currentThread().getName()+":"+element.toString());
+                if(++removeIndex == elements.length){
+                    removeIndex = 0;
+                }
+                length--;
+                unFull.signal();//删除一个后，释放没有满的锁
+                return (T)element;
+            }finally {
+                lock.unlock();
+            }
+        }
+
+
+
     }
 
 
