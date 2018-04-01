@@ -35,5 +35,28 @@ public class BinaryTest {
         //无符号右移
         System.out.println(Integer.toBinaryString(-5));
         System.out.println(Integer.toBinaryString(-5>>>2));
+
+    }
+
+    /**
+     * 异或运算
+     */
+    @Test
+    public void testBinary1(){
+        System.out.println(Integer.toBinaryString(15));// 00001111
+        System.out.println(Integer.toBinaryString(16));// 00010000
+        System.out.println(15&16);                        // 00000000
+
+        System.out.println(Integer.toBinaryString(15));// 00001111
+        System.out.println(Integer.toBinaryString(16));// 00010000
+        System.out.println(15|16);                        // 00011111
+
+        System.out.println(Integer.toBinaryString(8)); // 00001000
+        System.out.println(Integer.toBinaryString(15));// 00001111
+        System.out.println(8 &15);                        // 00001000
+
+        System.out.println(Integer.toBinaryString(8)); // 00001000
+        System.out.println(Integer.toBinaryString(15));// 00001111
+        System.out.println(8 |15);                        // 00001111
     }
 }
