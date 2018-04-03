@@ -1,4 +1,4 @@
-package com.ansfc.design;
+package com.ansfc.design.proxy;
 
 import org.junit.Test;
 
