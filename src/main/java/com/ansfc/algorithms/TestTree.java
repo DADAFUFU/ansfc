@@ -57,17 +57,18 @@ public class TestTree {
             return;
         }
         Stack<TreeNode> stack = new Stack<>();
-        stack.push(root);
-        while(stack.size()>0){
-            TreeNode node = stack.pop();
-            result.add(node);
-            if(node.right!=null){
-                stack.push(node.right);
+        while(root!=null || !stack.isEmpty()){
+
+            while(root!=null){
+                result.add(root);
+                stack.push(root);
+                root = root.left;
+            }
+            if(!stack.isEmpty()){
+                TreeNode node = stack.pop();
+                root = node.right;
             }
 
-            if(node.left!=null){
-                stack.push(node.left);
-            }
         }
     }
 
@@ -81,7 +82,7 @@ public class TestTree {
             return;
         }
         Stack<TreeNode> stack = new Stack<>();
-        while(root!=null || stack.size()>0){
+        while(root!=null || !stack.isEmpty()){
             while(root!=null){
                 stack.push(root);
                 root = root.left;
@@ -105,20 +106,19 @@ public class TestTree {
         }
         Stack<TreeNode> stack = new Stack<>();
         TreeNode preNode = null;
-        while(root!=null && stack.size()>0){
-            while(root!=null){
+        while(root!=null && !stack.isEmpty()){
+            while (root!=null){
                 stack.push(root);
                 root = root.left;
             }
-            if(stack.size()>0){
-                TreeNode temp = stack.peek().right;
-                if(temp == null || temp == preNode){
-                    TreeNode node = stack.pop();
-                    preNode = node;
-                    result.add(node);
-                    root = null;
+            if(!stack.isEmpty()){
+                TreeNode cur = stack.pop();
+                if(cur.right == null || cur.right == preNode){
+                    result.add(cur);
+                    preNode = cur;
                 }else{
-                    root = temp;
+                    stack.push(cur);
+                    root = cur.right;
                 }
             }
         }
