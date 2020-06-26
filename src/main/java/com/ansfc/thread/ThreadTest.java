@@ -9,10 +9,12 @@ public class ThreadTest {
 
     private static Object obj = new Object();
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception {
 //        testYield();
-//        testWait();
-        testJoin();
+//        testWait1();
+//        testWait2();
+        testWait3();
+//        testJoin();
     }
 
 
@@ -104,6 +106,162 @@ public class ThreadTest {
         public void run() {
             System.out.println("自线程执行完毕");
         }
+    }
+
+    public static void testDeadLock(){
+
+        Object object1 = new Object();
+        Object object2 = new Object();
+
+        Thread thread1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                synchronized (object1){
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    synchronized (object2){
+                        System.out.println("lock object2");
+                    }
+                }
+
+            }
+        });
+
+        Thread thread2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (object2){
+
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    synchronized (object1){
+                        System.out.println("lock object1");
+                    }
+
+                }
+            }
+        });
+        thread1.start();
+        thread2.start();
+
+    }
+
+
+    /**
+     * 使用Object的wait机制实现两个线程交替打印
+     */
+    public static void testWait1(){
+
+        Object lock = new Object();
+        Thread thread1 = new Thread(() -> {
+            synchronized (lock){
+                for(int i=0;i<5;i++){
+                    System.out.println("a");
+                    lock.notifyAll();
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        Thread thread2 = new Thread(() -> {
+            synchronized (lock){
+                for(int i=0;i<5;i++){
+                    System.out.println("b");
+                    lock.notifyAll();
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        thread1.start();
+        thread2.start();
+    }
+
+    static volatile boolean printA = true;
+    static volatile boolean printB = false;
+
+    /**
+     * 使用valatile实现两个线程交替打印
+     */
+    public static void testWait2(){
+
+
+
+        Thread thread1 = new Thread(() -> {
+
+            for(int i=0;i<5;i++){
+                while (printB){
+
+                }
+                System.out.println("a");
+                printB = true;
+                printA = false;
+            }
+
+        });
+
+        Thread thread2 = new Thread(() -> {
+
+            for(int i=0;i<5;i++){
+                while (printA){
+
+                }
+                System.out.println("b");
+                printB = false;
+                printA = true;
+            }
+
+        });
+        thread1.start();
+        thread2.start();
+
+    }
+
+    static volatile int count = 0;
+
+
+    /**
+     * 利用volatile线程可见性实现交替打印
+     * @throws InterruptedException
+     */
+    public static void testWait3() throws InterruptedException {
+
+        Thread thread1 = new Thread(() -> {
+            while(count<10){
+                if(count % 2 == 0){
+                    System.out.println("a");
+                    count++;
+                }
+            }
+        });
+
+        Thread thread2 = new Thread(() -> {
+             while(count<10){
+                 if(count%2 == 1){
+                     System.out.println("b");
+                     count++;
+                 }
+             }
+        });
+
+        thread1.start();
+        thread2.start();
+        thread1.join();
+        thread2.join();
+
     }
 
 }
